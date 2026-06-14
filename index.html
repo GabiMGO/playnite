@@ -10,7 +10,14 @@
     .toolbar { position: sticky; z-index: 2; top: 0; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 18px; background: rgba(0, 0, 0, .9); backdrop-filter: blur(12px); }
     button, input { min-height: 42px; border: 1px solid #202024; border-radius: 7px; color: #c9c9ce; background: rgba(18, 18, 20, .72); font: inherit; }
     button { padding: 9px 14px; cursor: pointer; }
-    input { flex: 1 1 240px; min-width: 160px; padding: 9px 12px; }
+    .search-box { position: relative; flex: 1 1 240px; min-width: 160px; }
+    .search-box input { width: 100%; padding: 9px 42px 9px 12px; }
+    .clear-search { position: absolute; top: 50%; right: 5px; display: none; width: 32px; min-height: 32px; padding: 0; border: 0; border-radius: 50%; color: #57575d; background: #18181c; transform: translateY(-50%); }
+    .clear-search::before, .clear-search::after { position: absolute; top: 50%; left: 50%; width: 12px; height: 1px; content: ''; background: currentColor; transform-origin: center; }
+    .clear-search::before { transform: translate(-50%, -50%) rotate(45deg); }
+    .clear-search::after { transform: translate(-50%, -50%) rotate(-45deg); }
+    .clear-search:hover, .clear-search:focus-visible { color: #85858d; background: #202025; }
+    .clear-search.visible { display: flex; }
     input::placeholder { color: #707078; }
     button:hover, button:focus-visible, button[aria-pressed="true"], input:focus-visible { border-color: #484850; color: white; background: #18181c; outline: none; }
     main, .platform-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px; padding: 22px; }
@@ -28,7 +35,7 @@
     @media (max-width: 600px) {
       .toolbar { padding: 10px; }
       button { flex: 1 1 auto; padding-inline: 10px; }
-      input { flex-basis: 100%; order: -1; }
+      .search-box { flex-basis: 100%; order: -1; }
       main, .platform-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 14px; padding: 14px; }
       .platform-group .platform-grid { padding: 10px 0 4px; }
       .platform-group h2 { font-size: 17px; }
@@ -40,7 +47,10 @@
 </head>
 <body>
   <nav class="toolbar" aria-label="Gallery controls">
-    <input id="search" type="search" placeholder="Search games..." aria-label="Search games by name">
+    <div class="search-box">
+      <input id="search" type="search" placeholder="Search all 490 games..." aria-label="Search games by name">
+      <button id="clear-search" class="clear-search" type="button" aria-label="Clear search" title="Clear search"></button>
+    </div>
     <button id="sort-name" type="button">Name: A-Z</button>
     <button id="sort-playtime" type="button">Playtime: high-low</button>
     <button id="sort-last-played" type="button">Last played: recent</button>
@@ -507,7 +517,7 @@
       <img src="covers/dae8a77b511f438688fb37fb9d533379.webp" alt="Dragon Ball: Sparking! Zero" loading="lazy" decoding="async">
       <figcaption>1h 20m</figcaption>
     </figure>
-    <figure class="cover" tabindex="0" data-name="DRAGON QUEST III HD-2D Remake" data-sort-name="DRAGON QUEST 03 HD-2D Remake" data-playtime="26771" data-last-played="639164457519880000" data-platform="PC (Windows)" aria-label="DRAGON QUEST III HD-2D Remake, played 7h 26m, platform PC (Windows)">
+    <figure class="cover" tabindex="0" data-name="DRAGON QUEST III HD-2D Remake" data-sort-name="DRAGON QUEST 03 HD-2D Remake" data-playtime="26785" data-last-played="639169760093100000" data-platform="PC (Windows)" aria-label="DRAGON QUEST III HD-2D Remake, played 7h 26m, platform PC (Windows)">
       <img src="covers/7b857b3cbdbb44fc92606c3129fbeba4.webp" alt="DRAGON QUEST III HD-2D Remake" loading="lazy" decoding="async">
       <figcaption>7h 26m</figcaption>
     </figure>
@@ -2011,6 +2021,8 @@
   <script>
     const gallery = document.querySelector('#gallery');
     const cards = [...gallery.querySelectorAll('.cover')];
+    const search = document.querySelector('#search');
+    const clearSearch = document.querySelector('#clear-search');
     let sortKey = 'name';
     let sortDirection = 1;
     let grouped = false;
@@ -2089,8 +2101,17 @@
       render();
     });
 
-    document.querySelector('#search').addEventListener('input', event => {
+    search.addEventListener('input', event => {
       searchQuery = event.currentTarget.value.trim().toLocaleLowerCase();
+      clearSearch.classList.toggle('visible', event.currentTarget.value.length > 0);
+      render();
+    });
+
+    clearSearch.addEventListener('click', () => {
+      search.value = '';
+      searchQuery = '';
+      clearSearch.classList.remove('visible');
+      search.focus();
       render();
     });
 
